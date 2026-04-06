@@ -80,6 +80,7 @@ jobs:
       - name: Install dependencies
         run: |
           rm -f composer.lock
+          composer config audit.block-insecure false
           composer require "orchestra/testbench:${{ matrix.testbench }}" "phpunit/phpunit:${{ matrix.phpunit }}" --dev --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --with-all-dependencies
 
