@@ -11,7 +11,8 @@ class BaseCriteriaTest extends TestCase
 {
     private function makeCriteria(string|array $columns, mixed $value = 'test', string $boolean = 'and'): BaseCriteria
     {
-        return new class($value, ['columns' => $columns, 'boolean' => $boolean]) extends BaseCriteria {
+        return new class($value, ['columns' => $columns, 'boolean' => $boolean]) extends BaseCriteria
+        {
             public function apply(Builder $query): void {}
 
             public function getExposedColumns(): string|array

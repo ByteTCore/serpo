@@ -27,6 +27,7 @@ class JsonCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -48,6 +49,7 @@ class JsonCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 

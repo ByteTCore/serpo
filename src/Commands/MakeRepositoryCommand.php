@@ -18,7 +18,7 @@ class MakeRepositoryCommand extends GeneratorCommand
 
     protected function getStub(): string
     {
-        return __DIR__ . '/../Stubs/repository.stub';
+        return __DIR__.'/../Stubs/repository.stub';
     }
 
     protected function getDefaultNamespace($rootNamespace): string
@@ -39,7 +39,7 @@ class MakeRepositoryCommand extends GeneratorCommand
         );
     }
 
-    public function handle(): bool|null
+    public function handle(): ?bool
     {
         $result = parent::handle();
 

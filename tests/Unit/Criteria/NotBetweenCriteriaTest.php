@@ -28,6 +28,7 @@ class NotBetweenCriteriaTest extends TestCase
             })
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 

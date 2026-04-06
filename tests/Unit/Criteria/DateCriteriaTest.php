@@ -26,6 +26,7 @@ class DateCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -47,6 +48,7 @@ class DateCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -68,6 +70,7 @@ class DateCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -84,7 +87,7 @@ class DateCriteriaTest extends TestCase
         $criteria = new DateCriteria('2025-01-01', ['columns' => 'start_date|end_date', 'boolean' => 'or']);
         $criteria->apply($query);
     }
-    
+
     public function test_skips_when_value_is_null_or_empty(): void
     {
         $query = $this->mockBuilder();
@@ -92,23 +95,24 @@ class DateCriteriaTest extends TestCase
 
         $criteria = new DateCriteria(null, ['columns' => 'created_at']);
         $criteria->apply($query);
-        
+
         $criteria2 = new DateCriteria('', ['columns' => 'created_at']);
         $criteria2->apply($query);
     }
-    
+
     public function test_does_not_skip_zero_string(): void
     {
         $query = $this->mockBuilder();
-        
+
         $query->shouldReceive('where')
             ->once()
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
-            
+
         $query->shouldReceive('whereDate')
             ->once()
             ->with('created_at', '=', '0', 'and')

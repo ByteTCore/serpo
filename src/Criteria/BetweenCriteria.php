@@ -11,9 +11,6 @@ class BetweenCriteria extends BaseCriteria
 {
     /**
      * Apply the WHERE BETWEEN condition to the query builder.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return void
      */
     public function apply(Builder $query): void
     {

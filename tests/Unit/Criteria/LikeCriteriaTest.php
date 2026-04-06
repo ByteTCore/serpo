@@ -26,6 +26,7 @@ class LikeCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -47,6 +48,7 @@ class LikeCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -68,6 +70,7 @@ class LikeCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -89,6 +92,7 @@ class LikeCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -100,7 +104,7 @@ class LikeCriteriaTest extends TestCase
         $criteria = new LikeCriteria('spam', ['columns' => 'name', 'boolean' => 'and', 'operator' => 'not like']);
         $criteria->apply($query);
     }
-    
+
     public function test_skips_when_value_is_null_or_empty(): void
     {
         $query = $this->mockBuilder();
@@ -108,23 +112,24 @@ class LikeCriteriaTest extends TestCase
 
         $criteria = new LikeCriteria(null, ['columns' => 'name']);
         $criteria->apply($query);
-        
+
         $criteria2 = new LikeCriteria('', ['columns' => 'name']);
         $criteria2->apply($query);
     }
-    
+
     public function test_does_not_skip_zero_string(): void
     {
         $query = $this->mockBuilder();
-        
+
         $query->shouldReceive('where')
             ->once()
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
-            
+
         $query->shouldReceive('where')
             ->once()
             ->with('name', 'like', '%0%', 'and')

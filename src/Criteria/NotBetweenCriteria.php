@@ -11,9 +11,6 @@ class NotBetweenCriteria extends BaseCriteria
 {
     /**
      * Apply the WHERE NOT BETWEEN condition to the query builder.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return void
      */
     public function apply(Builder $query): void
     {

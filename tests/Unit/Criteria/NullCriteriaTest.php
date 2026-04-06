@@ -2,8 +2,8 @@
 
 namespace ByteTCore\Serpo\Tests\Unit\Criteria;
 
-use ByteTCore\Serpo\Criteria\NullCriteria;
 use ByteTCore\Serpo\Criteria\NotNullCriteria;
+use ByteTCore\Serpo\Criteria\NullCriteria;
 use Illuminate\Database\Eloquent\Builder;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
@@ -27,6 +27,7 @@ class NullCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -48,6 +49,7 @@ class NullCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -69,6 +71,7 @@ class NullCriteriaTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 

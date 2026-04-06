@@ -11,9 +11,6 @@ class NotNullCriteria extends BaseCriteria
 {
     /**
      * Apply the WHERE NOT NULL condition to the query builder.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return void
      */
     public function apply(Builder $query): void
     {

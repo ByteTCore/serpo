@@ -19,7 +19,7 @@ class MakeServiceCommand extends GeneratorCommand
 
     protected function getStub(): string
     {
-        return __DIR__ . '/../Stubs/service.stub';
+        return __DIR__.'/../Stubs/service.stub';
     }
 
     protected function getDefaultNamespace($rootNamespace): string
@@ -35,7 +35,7 @@ class MakeServiceCommand extends GeneratorCommand
 
         return str_replace(
             ['DummyRepositoryNamespace', '$DummyRepository', 'DummyRepository'],
-            [$repoNamespace, '$' . lcfirst($repoClass), $repoClass],
+            [$repoNamespace, '$'.lcfirst($repoClass), $repoClass],
             $stub
         );
     }
@@ -53,7 +53,7 @@ class MakeServiceCommand extends GeneratorCommand
         $repository = str_replace('/', '\\', $repository);
         $repoNamespace = $this->resolveConfigNamespace(trim($rootNamespace, '\\'), 'repository', 'Repositories');
 
-        return $repoNamespace . '\\' . $repository;
+        return $repoNamespace.'\\'.$repository;
     }
 
     protected function getOptions(): array

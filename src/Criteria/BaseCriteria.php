@@ -10,8 +10,8 @@ abstract class BaseCriteria implements CriteriaInterface
     /**
      * Create a new criteria instance.
      *
-     * @param mixed $value The filtering value from request.
-     * @param array $config The criteria configuration.
+     * @param  mixed  $value  The filtering value from request.
+     * @param  array  $config  The criteria configuration.
      */
     public function __construct(
         protected mixed $value,
@@ -22,8 +22,6 @@ abstract class BaseCriteria implements CriteriaInterface
 
     /**
      * Get the raw columns from config.
-     *
-     * @return string|array
      */
     protected function getColumns(): string|array
     {
@@ -32,8 +30,6 @@ abstract class BaseCriteria implements CriteriaInterface
 
     /**
      * Parse columns into an array.
-     *
-     * @return array
      */
     protected function parseColumns(): array
     {
@@ -46,8 +42,6 @@ abstract class BaseCriteria implements CriteriaInterface
 
     /**
      * Get the boolean connector (and/or).
-     *
-     * @return string
      */
     protected function getBoolean(): string
     {
@@ -56,9 +50,6 @@ abstract class BaseCriteria implements CriteriaInterface
 
     /**
      * Get the operator for the condition.
-     *
-     * @param string $default
-     * @return string
      */
     protected function getOperator(string $default = '='): string
     {
@@ -68,8 +59,7 @@ abstract class BaseCriteria implements CriteriaInterface
     /**
      * Validate the columns configuration.
      *
-     * @return void
-     * @throws \ByteTCore\Serpo\Exceptions\InvalidCriteriaException
+     * @throws InvalidCriteriaException
      */
     private function validateColumns(): void
     {

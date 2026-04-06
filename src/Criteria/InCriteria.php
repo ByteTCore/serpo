@@ -11,9 +11,6 @@ class InCriteria extends BaseCriteria
 {
     /**
      * Apply the WHERE IN condition to the query builder.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return void
      */
     public function apply(Builder $query): void
     {

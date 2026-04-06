@@ -12,9 +12,6 @@ class LikeCriteria extends BaseCriteria
 {
     /**
      * Apply the LIKE condition to the query builder.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return void
      */
     public function apply(Builder $query): void
     {
@@ -35,8 +32,6 @@ class LikeCriteria extends BaseCriteria
 
     /**
      * Format the value according to the configured pattern.
-     *
-     * @return string
      */
     private function formatValue(): string
     {

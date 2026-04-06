@@ -28,6 +28,7 @@ class WhereCriteriaTest extends TestCase
             })
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -51,6 +52,7 @@ class WhereCriteriaTest extends TestCase
             })
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -74,6 +76,7 @@ class WhereCriteriaTest extends TestCase
             })
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
 
@@ -98,7 +101,7 @@ class WhereCriteriaTest extends TestCase
 
         $criteria = new WhereCriteria(null, ['columns' => 'status']);
         $criteria->apply($query);
-        
+
         $criteria2 = new WhereCriteria('', ['columns' => 'status']);
         $criteria2->apply($query);
     }
@@ -106,15 +109,16 @@ class WhereCriteriaTest extends TestCase
     public function test_does_not_skip_zero(): void
     {
         $query = $this->mockBuilder();
-        
+
         $query->shouldReceive('where')
             ->once()
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) use ($query) {
                 $callback($query);
+
                 return $query;
             });
-            
+
         $query->shouldReceive('where')
             ->once()
             ->with('status', '=', 0, 'and')

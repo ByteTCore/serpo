@@ -2,8 +2,8 @@
 
 namespace ByteTCore\Serpo\Tests\Unit\Repository;
 
-use ByteTCore\Serpo\Criteria\WhereCriteria;
 use ByteTCore\Serpo\Criteria\LikeCriteria;
+use ByteTCore\Serpo\Criteria\WhereCriteria;
 use ByteTCore\Serpo\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -29,13 +29,12 @@ class BaseRepositoryTest extends TestCase
         $this->model->shouldReceive('newQuery')->andReturn($this->builder);
     }
 
-
-
     private function makeRepository(?array $conditions = []): BaseRepository
     {
         $model = $this->model;
 
-        return new class($model, $conditions) extends BaseRepository {
+        return new class($model, $conditions) extends BaseRepository
+        {
             public function __construct(Model $model, private array $customConditions = [])
             {
                 parent::__construct($model);
@@ -54,7 +53,8 @@ class BaseRepositoryTest extends TestCase
     {
         $model = $this->model;
 
-        return new class($model, $conditions) extends BaseRepository {
+        return new class($model, $conditions) extends BaseRepository
+        {
             public function __construct(Model $model, array $conditions)
             {
                 $this->conditions = $conditions;
@@ -96,6 +96,7 @@ class BaseRepositoryTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) {
                 $callback($this->builder);
+
                 return $this->builder;
             });
 
@@ -124,6 +125,7 @@ class BaseRepositoryTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) {
                 $callback($this->builder);
+
                 return $this->builder;
             });
 
@@ -155,6 +157,7 @@ class BaseRepositoryTest extends TestCase
             ->withArgs(fn ($arg) => is_callable($arg))
             ->andReturnUsing(function ($callback) {
                 $callback($this->builder);
+
                 return $this->builder;
             });
 
@@ -178,7 +181,7 @@ class BaseRepositoryTest extends TestCase
         $this->builder->shouldReceive('get')
             ->twice()
             ->with()
-            ->andReturn(new Collection());
+            ->andReturn(new Collection);
 
         // Without auto-reset — model->newQuery should not be called again
         $this->model->shouldReceive('newQuery')->andReturn($this->builder);

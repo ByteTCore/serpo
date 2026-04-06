@@ -5,9 +5,7 @@ namespace ByteTCore\Serpo\Repositories;
 use BadMethodCallException;
 use ByteTCore\Serpo\Contracts\RepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Traits\ForwardsCalls;
 
 /**
@@ -22,15 +20,11 @@ abstract class BaseRepository implements RepositoryInterface
 
     /**
      * The Eloquent query builder instance.
-     *
-     * @var Builder
      */
     protected Builder $query;
 
     /**
      * Whether to reset the query after the result is returned.
-     *
-     * @var bool
      */
     protected bool $autoReset = true;
 
@@ -44,20 +38,17 @@ abstract class BaseRepository implements RepositoryInterface
     /**
      * Create a new repository instance.
      *
-     * @param Model $model The Eloquent model instance.
+     * @param  Model  $model  The Eloquent model instance.
      */
     public function __construct(protected Model $model)
     {
         $this->resetQuery();
     }
 
-
-
     /**
      * Multi-criteria matching with unified config from constants.
      *
-     * @param array|null $filters The filters to apply.
-     * @return static
+     * @param  array|null  $filters  The filters to apply.
      */
     public function filters(?array $filters = null): static
     {
@@ -90,8 +81,6 @@ abstract class BaseRepository implements RepositoryInterface
 
     /**
      * Disable query builder reset for next chain.
-     *
-     * @return static
      */
     public function withoutAutoReset(): static
     {
@@ -103,9 +92,6 @@ abstract class BaseRepository implements RepositoryInterface
     /**
      * Handle dynamic method calls into the model or query builder.
      *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      *
      * @throws BadMethodCallException
      */
@@ -134,8 +120,6 @@ abstract class BaseRepository implements RepositoryInterface
 
     /**
      * Reset the query builder to a new model query.
-     *
-     * @return static
      */
     public function resetQuery(): static
     {

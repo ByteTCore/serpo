@@ -42,7 +42,7 @@ class OrderByCriteriaTest extends TestCase
         $criteria = new OrderByCriteria('invalid_direction', ['columns' => 'name']);
         $criteria->apply($query);
     }
-    
+
     public function test_skips_when_null(): void
     {
         $query = $this->mockBuilder();

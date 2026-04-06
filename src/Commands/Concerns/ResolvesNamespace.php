@@ -9,7 +9,7 @@ trait ResolvesNamespace
         $namespace = config("serpo.{$configKey}.namespace");
 
         return $namespace
-            ? rtrim($rootNamespace, '\\') . '\\' . ltrim($namespace, '\\')
-            : $rootNamespace . '\\' . $fallback;
+            ? rtrim($rootNamespace, '\\').'\\'.ltrim($namespace, '\\')
+            : $rootNamespace.'\\'.$fallback;
     }
 }

@@ -18,7 +18,7 @@ class MakeCriteriaCommand extends GeneratorCommand
 
     protected function getStub(): string
     {
-        return __DIR__ . '/../Stubs/criteria.stub';
+        return __DIR__.'/../Stubs/criteria.stub';
     }
 
     protected function getDefaultNamespace($rootNamespace): string

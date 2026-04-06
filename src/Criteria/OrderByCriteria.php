@@ -11,9 +11,6 @@ class OrderByCriteria extends BaseCriteria
 {
     /**
      * Apply the order by condition to the query builder.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return void
      */
     public function apply(Builder $query): void
     {
@@ -22,7 +19,7 @@ class OrderByCriteria extends BaseCriteria
         }
 
         $columns = $this->parseColumns();
-        
+
         // Ensure direction is valid
         $direction = strtolower((string) $this->value);
         if (! in_array($direction, ['asc', 'desc'], true)) {
@@ -30,7 +27,7 @@ class OrderByCriteria extends BaseCriteria
         }
 
         array_walk(
-            $columns, 
+            $columns,
             fn (string $col) => $query->orderBy($col, $direction)
         );
     }
