@@ -1,3 +1,14 @@
+## [1.0.1] - 2026-04-06
+- chore: update PHP and Laravel versions in tests configuration (f89e561)
+- chore: update PHP and Laravel versions in tests configuration (5fcdfa7)
+- chore: update PHP and Laravel versions in tests configuration (05b8a97)
+- chore: update PHP and Laravel versions in tests configuration (53ec48c)
+- chore: update PHP and Laravel versions in tests configuration (72749f7)
+- chore: update PHP and Laravel versions in tests configuration (9cd474a)
+- chore: update PHP and Laravel versions in tests configuration (bd5f779)
+- Merge remote-tracking branch 'origin/master' (0b4dc85)
+- update PHPUnit version constraints and improve code formatting (0256ce8)
+
 ## [1.0.0] - 2026-04-06
 Initial release
 

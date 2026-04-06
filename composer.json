@@ -1,7 +1,7 @@
 {
     "name": "bytetcore/serpo",
     "description": "Laravel Repository Pattern - Elegant data layer abstraction with criteria-based filtering for Eloquent models.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "keywords": [
         "laravel",
         "repository",
