@@ -1,128 +1,61 @@
 <?php
 
-namespace Dovutuan\Serpo\Commands;
+namespace ByteTCore\Serpo\Commands;
 
+use ByteTCore\Serpo\Commands\Concerns\ResolvesNamespace;
 use Illuminate\Console\GeneratorCommand;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 
 class MakeServiceCommand extends GeneratorCommand
 {
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
+    use ResolvesNamespace;
+
     protected $name = 'make:service';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Create a new service class';
 
-    /**
-     * The type of class being generated.
-     *
-     * @var string
-     */
     protected $type = 'Service';
 
-    /**
-     * Get the stub file path for the generator.
-     *
-     * @return string
-     */
     protected function getStub(): string
     {
         return __DIR__ . '/../Stubs/service.stub';
     }
 
-    /**
-     * Get the default namespace for the service class.
-     *
-     * @param string $rootNamespace
-     * @return string
-     */
     protected function getDefaultNamespace($rootNamespace): string
     {
-        $configNamespace = config('serpo.service.namespace');
-
-        return $configNamespace
-            ? rtrim($rootNamespace, '\\') . '\\' . ltrim($configNamespace, '\\')
-            : $rootNamespace . '\\Services';
+        return $this->resolveConfigNamespace($rootNamespace, 'service', 'Services');
     }
 
-    /**
-     * Get the default namespace for the repository class.
-     *
-     * @param string $rootNamespace
-     * @return string
-     */
-    protected function getRepositoryNamespace(string $rootNamespace): string
-    {
-        $configNamespace = config('serpo.repository.namespace');
-
-        return $configNamespace
-            ? rtrim($rootNamespace, '\\') . '\\' . ltrim($configNamespace, '\\')
-            : $rootNamespace . '\\Repositories';
-    }
-
-    /**
-     * Build the service class with the given name, replacing repository placeholders.
-     *
-     * @param string $name
-     * @return string
-     * @throws FileNotFoundException
-     */
     protected function buildClass($name): string
     {
         $stub = parent::buildClass($name);
-
-        $repositoryNamespace = $this->qualifyRepository($name);
-        $repositoryClass = class_basename($repositoryNamespace);
-        $repositoryVar = lcfirst($repositoryClass);
+        $repoNamespace = $this->qualifyRepository($name);
+        $repoClass = class_basename($repoNamespace);
 
         return str_replace(
             ['DummyRepositoryNamespace', '$DummyRepository', 'DummyRepository'],
-            [$repositoryNamespace, "$$repositoryVar", $repositoryClass],
+            [$repoNamespace, '$' . lcfirst($repoClass), $repoClass],
             $stub
         );
     }
 
-    /**
-     * Determine the fully-qualified repository class name.
-     *
-     * @param string $name
-     * @return string
-     */
     protected function qualifyRepository(string $name): string
     {
         $rootNamespace = $this->laravel->getNamespace();
-        $repository = $this->option('repository');
-
-        if (!$repository) {
-            $repository = str_replace('Service', 'Repository', class_basename($name));
-        }
+        $repository = $this->option('repository')
+            ?? str_replace('Service', 'Repository', class_basename($name));
 
         if (Str::startsWith($repository, $rootNamespace)) {
             return $repository;
         }
 
-        if (Str::contains($repository, '/')) {
-            $repository = str_replace('/', '\\', $repository);
-        }
+        $repository = str_replace('/', '\\', $repository);
+        $repoNamespace = $this->resolveConfigNamespace(trim($rootNamespace, '\\'), 'repository', 'Repositories');
 
-        return $this->getRepositoryNamespace(trim($rootNamespace, '\\')) . '\\' . $repository;
+        return $repoNamespace . '\\' . $repository;
     }
 
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
     protected function getOptions(): array
     {
         return [

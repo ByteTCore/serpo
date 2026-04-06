@@ -1,18 +1,25 @@
 <?php
 
-namespace Dovutuan\Serpo\Exceptions;
+namespace ByteTCore\Serpo\Exceptions;
 
 use InvalidArgumentException;
 
 class InvalidCriteriaException extends InvalidArgumentException
 {
-    public static function forFields($columns): self
+    public static function invalidFormat(mixed $columns): self
     {
-        return new self(
-            sprintf(
-                'Invalid fields format. Expected string or array of strings, got: %s',
-                is_object($columns) ? get_class($columns) : gettype($columns)
-            )
-        );
+        $type = is_object($columns) ? $columns::class : gettype($columns);
+
+        return new self("Columns must be a non-empty string or array of strings, got: {$type}");
+    }
+
+    public static function emptyColumns(): self
+    {
+        return new self('Columns cannot be empty.');
+    }
+
+    public static function invalidArrayItem(): self
+    {
+        return new self('All columns must be non-empty strings.');
     }
 }

@@ -8,6 +8,5 @@ readonly class DummyClass
 {
     public function __construct(protected DummyRepository $DummyRepository)
     {
-
     }
 }

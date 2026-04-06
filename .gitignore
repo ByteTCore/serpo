@@ -1,14 +1,20 @@
 /.idea
 /.vscode
 /.fleet
+/.agent
 
 /vendor
-/resources/assets/vendor
 /build
+/node_modules
+
 composer.phar
-.php_cs.cache
+composer.lock
+
 .DS_Store
-/.phpunit.cache
-.phpunit.result.cache
-.php-cs-fixer.cache
 Thumbs.db
+
+.php_cs.cache
+.php-cs-fixer.cache
+.phpunit.cache
+.phpunit.result.cache
+__phpunit_output.txt

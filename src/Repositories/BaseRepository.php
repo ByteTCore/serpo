@@ -1,112 +1,146 @@
 <?php
 
-namespace Dovutuan\Serpo\Repositories;
+namespace ByteTCore\Serpo\Repositories;
 
 use BadMethodCallException;
-use Dovutuan\Serpo\Contracts\RepositoryInterface;
-use Dovutuan\Serpo\Traits\HasCriteria;
-use Dovutuan\Serpo\Traits\QueryBuilderTrait;
-use Dovutuan\Serpo\Traits\QueryTrait;
+use ByteTCore\Serpo\Contracts\RepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Traits\ForwardsCalls;
 
 /**
  * @mixin Builder
- * @mixin Collection
+ *
+ * @method static orderBy(string|array $column, string $direction = 'asc')
+ * @method static groupBy(array|string ...$groups)
  */
 abstract class BaseRepository implements RepositoryInterface
 {
-    use HasCriteria;
-    use QueryBuilderTrait;
-    use QueryTrait;
     use ForwardsCalls;
 
     /**
-     * The underlying Eloquent model instance.
-     *
-     * @var Model
-     */
-    protected Model $model;
-
-    /**
-     * The query builder instance for building queries on the model.
+     * The Eloquent query builder instance.
      *
      * @var Builder
      */
     protected Builder $query;
 
     /**
-     * Predefined filter conditions used by HasCriteria::filters().
+     * Whether to reset the query after the result is returned.
      *
-     * Structure example:
-     * [
-     *     'status' => [
-     *         'class' => \App\Criteria\StatusCriteria::class,
-     *         'columns' => 'status',
-     *         'operator' => 'and'
-     *     ],
-     *     'search' => [
-     *         'class' => \App\Criteria\SearchCriteria::class,
-     *         'columns' => ['name', 'email']
-     *     ]
-     * ]
+     * @var bool
+     */
+    protected bool $autoReset = true;
+
+    /**
+     * The configuration for mapping request keys to specific criteria class.
      *
-     * @var array<string, array>
+     * @var array<string, array<string, mixed>|string>
      */
     protected array $conditions = [];
 
     /**
      * Create a new repository instance.
      *
-     * @param Model $model
+     * @param Model $model The Eloquent model instance.
      */
-    public function __construct(Model $model)
+    public function __construct(protected Model $model)
     {
-        $this->model = $model;
-        $this->initInstance();
+        $this->resetQuery();
+    }
+
+
+
+    /**
+     * Multi-criteria matching with unified config from constants.
+     *
+     * @param array|null $filters The filters to apply.
+     * @return static
+     */
+    public function filters(?array $filters = null): static
+    {
+        if ($filters === null) {
+            return $this;
+        }
+
+        foreach ($filters as $key => $value) {
+            if (! isset($this->conditions[$key])) {
+                continue;
+            }
+
+            $config = $this->conditions[$key];
+
+            if (is_string($config)) {
+                $config = ['class' => $config];
+            }
+
+            $config['columns'] ??= $key;
+            $class = $config['class'];
+            $criteria = new $class($value, $config);
+
+            $criteria->apply($this->query);
+        }
+
+        return $this;
+    }
+
+    // ── Query Control ────────────────────────────────────────────────
+
+    /**
+     * Disable query builder reset for next chain.
+     *
+     * @return static
+     */
+    public function withoutAutoReset(): static
+    {
+        $this->autoReset = false;
+
+        return $this;
     }
 
     /**
-     * Dynamically handle calls to the underlying Eloquent Builder or Model.
+     * Handle dynamic method calls into the model or query builder.
      *
-     * - If the method exists on the current query builder, forward the call to it.
-     * - If the method is not found on the builder, attempt to call it on a new model query.
-     * - If the result is another Builder instance, update the current query and return $this
-     *   to allow method chaining on the repository.
-     * - Otherwise, return the raw result (e.g., Collection, Model, int, bool, etc.).
-     *
-     * @param string $method The method being called.
-     * @param array $parameters The method parameters.
+     * @param string $method
+     * @param array $parameters
      * @return mixed
      *
      * @throws BadMethodCallException
      */
-    public function __call(string $method, array $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         try {
             $result = $this->forwardCallTo($this->query, $method, $parameters);
-        } catch (BadMethodCallException $e) {
+        } catch (BadMethodCallException) {
             $result = $this->forwardCallTo($this->model->newModelQuery(), $method, $parameters);
         }
 
         if ($result instanceof Builder) {
             $this->query = $result;
+
             return $this;
+        }
+
+        if ($this->autoReset) {
+            $this->resetQuery();
         }
 
         return $result;
     }
 
+    // ── Internal ─────────────────────────────────────────────────────
+
     /**
-     * Initialize or reset the query builder instance.
+     * Reset the query builder to a new model query.
      *
-     * @return self
+     * @return static
      */
-    private function initInstance(): self
+    public function resetQuery(): static
     {
         $this->query = $this->model->newQuery();
+
         return $this;
     }
 }

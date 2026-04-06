@@ -2,25 +2,24 @@
 
 namespace DummyNamespace;
 
-use Dovutuan\Serpo\Criteria\BaseCriteria;
+use ByteTCore\Serpo\Criteria\BaseCriteria;
 use Illuminate\Database\Eloquent\Builder;
 
 class DummyClass extends BaseCriteria
 {
     public function apply(Builder $query): void
     {
+        if ($this->value === null || $this->value === '') {
+            return;
+        }
+
         $columns = $this->parseColumns();
 
-        // Add your custom filtering logic here
-        // Example:
-        // $query->where($columns[0], $this->operator, $this->value, $this->boolean);
-        // $query->where($columns[1], $this->operator, $this->value, $this->boolean);
-        // $query->when($this->value, function (Builder $query) use ($columns) {
-        //            $query->where(function (Builder $query) use ($columns) {
-        //                foreach ($columns as $column) {
-        //                    $query->where(column: $column, operator: '=', value: $this->value, boolean: $this->boolean);
-        //                }
-        //            });
-        //        });
+        $query->where(
+            fn (Builder $q) => array_walk(
+                $columns,
+                fn (string $col) => $q->where($col, '=', $this->value, $this->getBoolean())
+            )
+        );
     }
 }

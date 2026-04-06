@@ -1,21 +1,33 @@
 <?php
 
-namespace Dovutuan\Serpo\Criteria;
+namespace ByteTCore\Serpo\Criteria;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Criteria to apply WHERE NOT IN conditions.
+ */
 class NotInCriteria extends BaseCriteria
 {
+    /**
+     * Apply the WHERE NOT IN condition to the query builder.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
     public function apply(Builder $query): void
     {
+        if ($this->value === null || $this->value === '') {
+            return;
+        }
+
         $columns = $this->parseColumns();
 
-        $query->when($this->value, function (Builder $query) use ($columns) {
-            $query->where(function (Builder $query) use ($columns) {
-                foreach ($columns as $column) {
-                    $query->whereIn(column: $column, values: $this->value, boolean: $this->boolean);
-                }
-            });
-        });
+        $query->where(
+            fn (Builder $q) => array_walk(
+                $columns,
+                fn (string $col) => $q->whereNotIn($col, (array) $this->value, $this->getBoolean())
+            )
+        );
     }
 }

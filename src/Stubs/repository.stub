@@ -3,30 +3,29 @@
 namespace DummyNamespace;
 
 use DummyModelNamespace;
-use Dovutuan\Serpo\Repositories\BaseRepository;
+use ByteTCore\Serpo\Repositories\BaseRepository;
 
 class DummyClass extends BaseRepository
 {
     protected array $conditions = [
-        // Define your default conditions here
-        // Example:
-        //'email' => [
-        //    'class' => \Dovutuan\Serpo\Criteria\EqualCriteria::class
-        //],
-        //'name' => [
-        //    'class' => \Dovutuan\Serpo\Criteria\LikeCriteria::class,
-        //    'columns' => 'name'
-        //],
-        //'keyword' => [
-        //    'class' => \Dovutuan\Serpo\Criteria\LikeCriteria::class,
-        //    'columns' => 'name|email',
-        //    'operator' => 'or',
-        //],
-        //'date' => [
-        //    'class' => \Dovutuan\Serpo\Criteria\DateCriteria::class,
-        //    'columns' => 'start_date|end_date',
-        //    'operator' => 'and',
-        //],
+        // 'status' => \ByteTCore\Serpo\Criteria\WhereCriteria::class,
+        //
+        // 'keyword' => [
+        //     'class'   => \ByteTCore\Serpo\Criteria\LikeCriteria::class,
+        //     'columns' => 'name|email',
+        //     'boolean' => \ByteTCore\Serpo\Constants\Filter::OR,
+        // ],
+        //
+        // 'min_price' => [
+        //     'class'    => \ByteTCore\Serpo\Criteria\WhereCriteria::class,
+        //     'columns'  => 'price',
+        //     'operator' => \ByteTCore\Serpo\Constants\Filter::GTE,
+        // ],
+        //
+        // 'created_at' => [
+        //     'class'   => \ByteTCore\Serpo\Criteria\DateCriteria::class,
+        //     'columns' => 'created_at',
+        // ],
     ];
 
     public function __construct(DummyModel $model)

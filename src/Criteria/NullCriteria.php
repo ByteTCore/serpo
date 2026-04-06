@@ -1,17 +1,33 @@
 <?php
 
-namespace Dovutuan\Serpo\Criteria;
+namespace ByteTCore\Serpo\Criteria;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Criteria to apply WHERE NULL conditions.
+ */
 class NullCriteria extends BaseCriteria
 {
+    /**
+     * Apply the WHERE NULL condition to the query builder.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
     public function apply(Builder $query): void
     {
+        if ($this->value === null || $this->value === '') {
+            return;
+        }
+
         $columns = $this->parseColumns();
 
-        $query->when($this->value, function (Builder $query) use ($columns) {
-            $query->whereNull(columns: $columns, boolean: $this->boolean);
-        });
+        $query->where(
+            fn (Builder $q) => array_walk(
+                $columns,
+                fn (string $col) => $q->whereNull($col, $this->getBoolean())
+            )
+        );
     }
 }

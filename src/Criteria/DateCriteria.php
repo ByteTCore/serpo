@@ -1,21 +1,34 @@
 <?php
 
-namespace Dovutuan\Serpo\Criteria;
+namespace ByteTCore\Serpo\Criteria;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Criteria to apply date conditions using whereDate.
+ */
 class DateCriteria extends BaseCriteria
 {
+    /**
+     * Apply the date condition to the query builder.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
     public function apply(Builder $query): void
     {
-        $columns = $this->parseColumns();
+        if ($this->value === null || $this->value === '') {
+            return;
+        }
 
-        $query->when($this->value, function (Builder $query) use ($columns) {
-            $query->where(function (Builder $query) use ($columns) {
-                foreach ($columns as $column) {
-                    $query->whereDate(column: $column, operator: '=', value: $this->value, boolean: $this->boolean);
-                }
-            });
-        });
+        $columns = $this->parseColumns();
+        $operator = $this->getOperator('=');
+
+        $query->where(
+            fn (Builder $q) => array_walk(
+                $columns,
+                fn (string $col) => $q->whereDate($col, $operator, $this->value, $this->getBoolean())
+            )
+        );
     }
 }

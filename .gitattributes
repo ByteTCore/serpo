@@ -1,0 +1,28 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source files
+*.php text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.stub text eol=lf
+
+# Git config
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.editorconfig text eol=lf
+
+# Exclude from export (composer archive / GitHub release zips)
+/.agent export-ignore
+/.github export-ignore
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/tests export-ignore
+/phpunit.xml export-ignore
+/CHANGELOG.md export-ignore
+/CONTRIBUTING.md export-ignore
+/composer.lock export-ignore

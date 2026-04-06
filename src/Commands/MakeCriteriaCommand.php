@@ -1,14 +1,19 @@
 <?php
 
-namespace Dovutuan\Serpo\Commands;
+namespace ByteTCore\Serpo\Commands;
 
+use ByteTCore\Serpo\Commands\Concerns\ResolvesNamespace;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 class MakeCriteriaCommand extends GeneratorCommand
 {
+    use ResolvesNamespace;
+
     protected $name = 'make:criteria';
-    protected $description = 'Create a new custom criteria class';
+
+    protected $description = 'Create a new criteria class';
+
     protected $type = 'Criteria';
 
     protected function getStub(): string
@@ -18,29 +23,13 @@ class MakeCriteriaCommand extends GeneratorCommand
 
     protected function getDefaultNamespace($rootNamespace): string
     {
-        $configNamespace = config('serpo.criteria.namespace');
-
-        return $configNamespace
-            ? rtrim($rootNamespace, '\\') . '\\' . ltrim($configNamespace, '\\')
-            : $rootNamespace . '\\Criteria';
-    }
-
-    protected function buildClass($name): string
-    {
-        $stub = parent::buildClass($name);
-
-        return str_replace('DummyClass', $this->getClassName($name), $stub);
-    }
-
-    protected function getClassName($name): string
-    {
-        return class_basename($name);
+        return $this->resolveConfigNamespace($rootNamespace, 'criteria', 'Criteria');
     }
 
     protected function getOptions(): array
     {
         return [
-            ['force', 'f', InputOption::VALUE_NONE, 'Create the class even if the criteria already exists'],
+            ['force', 'f', InputOption::VALUE_NONE, 'Create the class even if it already exists'],
         ];
     }
 }
