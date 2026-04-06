@@ -22,7 +22,7 @@ jobs:
         include:
           - laravel: 9.*
             testbench: 7.*
-            phpunit: ^9.3
+            phpunit: ^9.5
           - laravel: 10.*
             testbench: 8.*
             phpunit: ^10.0
@@ -79,7 +79,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "phpunit/phpunit:${{ matrix.phpunit }}" --dev --no-interaction --no-update
+          rm -f composer.lock
+          composer require "orchestra/testbench:${{ matrix.testbench }}" "phpunit/phpunit:${{ matrix.phpunit }}" --dev --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --with-all-dependencies
 
       - name: Execute tests
