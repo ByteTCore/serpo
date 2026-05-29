@@ -1,3 +1,7 @@
+## [1.1.0] - 2026-05-29
+- chore: add CLAUDE.md to export-ignore in .gitattributes and fix newline in composer.json (2589c6b)
+- feat: add criteria system with Condition/ConditionGroup/NestedCriteria, extract traits from BaseRepository, add cache config (120b606)
+
 ## [1.0.1] - 2026-04-06
 - chore: update PHP and Laravel versions in tests configuration (f89e561)
 - chore: update PHP and Laravel versions in tests configuration (5fcdfa7)
