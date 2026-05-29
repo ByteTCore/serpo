@@ -2,31 +2,51 @@
 
 namespace DummyNamespace;
 
-use DummyModelNamespace;
+use App\Criteria\ActiveUserCriteria;
+use ByteTCore\Serpo\Criteria\Condition;
 use ByteTCore\Serpo\Repositories\BaseRepository;
+use DummyModelNamespace;
 
 class DummyClass extends BaseRepository
 {
-    protected array $conditions = [
-        // 'status' => \ByteTCore\Serpo\Criteria\WhereCriteria::class,
-        //
-        // 'keyword' => [
-        //     'class'   => \ByteTCore\Serpo\Criteria\LikeCriteria::class,
-        //     'columns' => 'name|email',
-        //     'boolean' => \ByteTCore\Serpo\Constants\Filter::OR,
-        // ],
-        //
-        // 'min_price' => [
-        //     'class'    => \ByteTCore\Serpo\Criteria\WhereCriteria::class,
-        //     'columns'  => 'price',
-        //     'operator' => \ByteTCore\Serpo\Constants\Filter::GTE,
-        // ],
-        //
-        // 'created_at' => [
-        //     'class'   => \ByteTCore\Serpo\Criteria\DateCriteria::class,
-        //     'columns' => 'created_at',
-        // ],
-    ];
+    /**
+     * Define the order in which filters are applied (optional).
+     *
+     * Keys listed first are applied first. Keys not listed here
+     * are appended in the order they appear in {@see conditions()}.
+     */
+    protected function filterOrder(): array
+    {
+        return [
+            // 'keyword',
+            // 'status',
+        ];
+    }
+
+    /**
+     * Map request keys to filter conditions.
+     *
+     * Each key corresponds to a query string / request parameter.
+     * Use {@see Condition} factories to build criteria fluently.
+     */
+    protected function conditions(): array
+    {
+        return [
+            'status'        => Condition::where(),
+            'keyword'       => Condition::like('name', 'email')->or(),
+            'min_age'       => Condition::where('age')->gte(),
+            'created_from'  => Condition::date('created_at')->gte(),
+            'price_between' => Condition::between('price'),
+            'tags'          => Condition::whereIn('tags'),
+            'deleted'       => Condition::whereNull('deleted_at'),
+            'birth_year'    => Condition::year('birth_date'),
+            'active'        => Condition::custom(ActiveUserCriteria::class),
+            'search'        => Condition::orGroup(
+                Condition::like('name'),
+                Condition::where('email'),
+            ),
+        ];
+    }
 
     public function __construct(DummyModel $model)
     {

@@ -2,6 +2,7 @@
 
 namespace ByteTCore\Serpo\Criteria;
 
+use ByteTCore\Serpo\Constants\Filter;
 use ByteTCore\Serpo\Contracts\CriteriaInterface;
 use ByteTCore\Serpo\Exceptions\InvalidCriteriaException;
 
@@ -25,7 +26,7 @@ abstract class BaseCriteria implements CriteriaInterface
      */
     protected function getColumns(): string|array
     {
-        return $this->config['columns'] ?? '';
+        return $this->config['columns'] ?? [];
     }
 
     /**
@@ -45,13 +46,13 @@ abstract class BaseCriteria implements CriteriaInterface
      */
     protected function getBoolean(): string
     {
-        return $this->config['boolean'] ?? 'and';
+        return $this->config['boolean'] ?? Filter::AND;
     }
 
     /**
      * Get the operator for the condition.
      */
-    protected function getOperator(string $default = '='): string
+    protected function getOperator(string $default = Filter::EQUAL): string
     {
         return $this->config['operator'] ?? $default;
     }
@@ -63,6 +64,10 @@ abstract class BaseCriteria implements CriteriaInterface
      */
     private function validateColumns(): void
     {
+        if (! array_key_exists('columns', $this->config)) {
+            return;
+        }
+
         $columns = $this->getColumns();
 
         if (is_string($columns)) {

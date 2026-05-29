@@ -2,6 +2,7 @@
 
 namespace ByteTCore\Serpo\Criteria;
 
+use ByteTCore\Serpo\Constants\Filter;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -20,7 +21,7 @@ class LikeCriteria extends BaseCriteria
         }
 
         $columns = $this->parseColumns();
-        $operator = $this->getOperator('like');
+        $operator = $this->getOperator(Filter::LIKE);
 
         $query->where(
             fn (Builder $q) => array_walk(
@@ -35,11 +36,11 @@ class LikeCriteria extends BaseCriteria
      */
     private function formatValue(): string
     {
-        $pattern = $this->config['pattern'] ?? 'contains';
+        $pattern = $this->config['pattern'] ?? Filter::CONTAINS;
 
         return match ($pattern) {
-            'starts_with' => "{$this->value}%",
-            'ends_with' => "%{$this->value}",
+            Filter::STARTS_WITH => "{$this->value}%",
+            Filter::ENDS_WITH => "%{$this->value}",
             default => "%{$this->value}%",
         };
     }

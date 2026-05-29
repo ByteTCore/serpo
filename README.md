@@ -120,42 +120,32 @@ $users = $repo->with('posts')->whereHas('posts')->get();
 
 ### Criteria-Based Filtering
 
-Define reusable filter conditions in your repository:
+Define reusable filters in your repository using the fluent `Condition` API:
 
 ```php
-use ByteTCore\Serpo\Criteria\WhereCriteria;
-use ByteTCore\Serpo\Criteria\LikeCriteria;
-use ByteTCore\Serpo\Criteria\DateCriteria;
-use ByteTCore\Serpo\Constants\Filter;
+use ByteTCore\Serpo\Criteria\Condition;
+use App\Criteria\ActiveUserCriteria;
 
 class UserRepository extends BaseRepository
 {
-    protected array $conditions = [
-        // Simple equality (default operator is '=')
-        'status' => WhereCriteria::class,
-
-        // Search across multiple columns
-        'keyword' => [
-            'class' => LikeCriteria::class,
-            'columns' => 'name|email',
-            'boolean' => Filter::OR,
-            'pattern' => Filter::CONTAINS,
-        ],
-
-        // Comparison operators via params
-        'min_age' => [
-            'class' => WhereCriteria::class,
-            'columns' => 'age',
-            'operator' => Filter::GTE,
-        ],
-
-        // Date filtering
-        'created_after' => [
-            'class' => DateCriteria::class,
-            'columns' => 'created_at',
-            'operator' => Filter::GTE,
-        ],
-    ];
+    protected function conditions(): array
+    {
+        return [
+            'status'   => Condition::where(),
+            'keyword'  => Condition::like('name', 'email')->or(),
+            'min_age'  => Condition::where('age')->gte(),
+            'created_from' => Condition::date('created_at')->gte(),
+            'price_between' => Condition::between('price'),
+            'tags'     => Condition::whereIn('tags'),
+            'deleted'  => Condition::whereNull('deleted_at'),
+            'birth_year' => Condition::year('birth_date'),
+            'active'   => Condition::custom(ActiveUserCriteria::class),
+            'search'   => Condition::orGroup(
+                Condition::like('name'),
+                Condition::where('email'),
+            ),
+        ];
+    }
 
     public function __construct(User $model)
     {
@@ -171,95 +161,129 @@ Apply filters from request data:
 $users = $repo->filters($request->only(['status', 'keyword', 'min_age']))->get();
 ```
 
+### Controlling Filter Application Order
+
+By default, filters are applied in the order declared in `conditions()`. Override `filterOrder()` to change the order without reordering the `conditions()` map:
+
+```php
+protected function filterOrder(): array
+{
+    return [
+        'keyword',  // applied first
+        'status',   // applied second
+    ];
+    // 'min_age', 'created_from', ... — any keys not listed are appended in original order
+}
+```
+
 ### Available Criteria
 
-| Criteria | Description | Params |
+| Factory | Criteria | SQL |
 |---|---|---|
-| `WhereCriteria` | `WHERE col op val` | `operator`: `=`, `<>`, `>`, `>=`, `<`, `<=` |
-| `LikeCriteria` | `WHERE col LIKE pattern` | `boolean`: `or`, `and`; `pattern`: `contains`, `starts_with`, `ends_with` |
-| `DateCriteria` | `WHERE DATE(col) op val` | `operator`: `=`, `<>`, `>`, `>=`, `<`, `<=` |
-| `BetweenCriteria` | `WHERE col BETWEEN val[0] AND val[1]` | — |
-| `NotBetweenCriteria`| `WHERE col NOT BETWEEN val[0] AND val[1]` | — |
-| `YearCriteria` | `WHERE YEAR(col) op val` | `operator`: `=`, `<>`, `>`, `>=`, `<`, `<=` |
-| `MonthCriteria` | `WHERE MONTH(col) op val` | `operator`: `=`, `<>`, `>`, `>=`, `<`, `<=` |
-| `InCriteria` | `WHERE col IN (...)` | — |
-| `NotInCriteria` | `WHERE col NOT IN (...)` | — |
-| `NullCriteria` | `WHERE col IS NULL` | — |
-| `NotNullCriteria` | `WHERE col IS NOT NULL` | — |
-| `JsonContainsCriteria` | `whereJsonContains` | — |
-| `JsonNotContainsCriteria` | `whereJsonDoesntContain` | — |
-| `OrderByCriteria` | `ORDER BY col (asc/desc)` | — |
+| `Condition::where()` | WhereCriteria | `WHERE col op val` |
+| `Condition::like()` | LikeCriteria | `WHERE col LIKE pattern` |
+| `Condition::date()` | DateCriteria | `WHERE DATE(col) op val` |
+| `Condition::between()` | BetweenCriteria | `WHERE col BETWEEN ? AND ?` |
+| `Condition::notBetween()` | NotBetweenCriteria | `WHERE col NOT BETWEEN ? AND ?` |
+| `Condition::year()` | YearCriteria | `WHERE YEAR(col) op val` |
+| `Condition::month()` | MonthCriteria | `WHERE MONTH(col) op val` |
+| `Condition::whereIn()` | InCriteria | `WHERE col IN (...)` |
+| `Condition::whereNotIn()` | NotInCriteria | `WHERE col NOT IN (...)` |
+| `Condition::whereNull()` | NullCriteria | `WHERE col IS NULL` |
+| `Condition::whereNotNull()` | NotNullCriteria | `WHERE col IS NOT NULL` |
+| `Condition::jsonContains()` | JsonContainsCriteria | `whereJsonContains` |
+| `Condition::jsonNotContains()` | JsonNotContainsCriteria | `whereJsonDoesntContain` |
+| `Condition::orderBy()` | OrderByCriteria | `ORDER BY col asc/desc` |
+| `Condition::andGroup(...)` | NestedCriteria | Nested `AND` group |
+| `Condition::orGroup(...)` | NestedCriteria | Nested `OR` group |
+| `Condition::custom()` | Any custom class | — |
+
+### Fluent modifiers
+
+| Modifier | Applies to | Example |
+|---|---|---|
+| `.columns(...)` | All | `Condition::where('name', 'email')` |
+| `.and()` / `.or()` | All | `Condition::like('name', 'email')->or()` |
+| `.gt()` / `.gte()` / `.lt()` / `.lte()` | where, date, year, month | `Condition::where('age')->gte()` |
+| `.not()` | where | `Condition::where('status')->not()` |
+| `.contains()` / `.startsWith()` / `.endsWith()` | like | `Condition::like('name')->startsWith()` |
+| `.asc()` / `.desc()` | orderBy | `Condition::orderBy('created_at')->desc()` |
 
 ### Detailed Criteria Walkthrough
 
 #### Database Comparisons
 ```php
-'status' => WhereCriteria::class, // Checks if 'status' matches input
-'price_over' => [
-    'class' => WhereCriteria::class,
-    'columns' => 'price',
-    'operator' => Filter::GTE // ->where('price', '>=', input)
-]
+'status'     => Condition::where(),              // WHERE status = input
+'price_over' => Condition::where('price')->gte(), // WHERE price >= input
+'not_admin'  => Condition::where('role')->not(), // WHERE role != input
 ```
 
 #### Search & Text (LikeCriteria)
-Automatically supports SQL padding (%) so you don't have to inject % in strings.
 ```php
-'keyword' => [
-    'class' => LikeCriteria::class,
-    'columns' => 'title|content|author',
-    'boolean' => Filter::OR, // ->where('title', 'like', '%val%') OR ->where('content', ...)
-    'pattern' => Filter::CONTAINS, // Optional. Other options: STARTS_WITH, ENDS_WITH
-]
+'keyword' => Condition::like('title', 'content', 'author')->or(),
+// WHERE (title LIKE '%val%' OR content LIKE '%val%' OR author LIKE '%val%')
+
+'prefix' => Condition::like('name')->startsWith(),
+// WHERE name LIKE 'val%'
+
+'suffix' => Condition::like('name')->endsWith(),
+// WHERE name LIKE '%val'
 ```
 
 #### Ranges (BetweenCriteria)
-Expects an array of precisely two values: `[$start, $end]`.
 ```php
-'price_range' => [
-    'class' => BetweenCriteria::class,
-    'columns' => 'price' // expects $request->price_range = [100, 500]
-]
+'price_range' => Condition::between('price'),
+// expects $request->price_range = [100, 500]
 ```
 
 #### Working with Dates
-Filter via specific date, year, or month. Extremely useful for reporting dashboards.
 ```php
-'created_at' => DateCriteria::class, // Date match YYYY-MM-DD
-'birth_year' => YearCriteria::class,
-'birth_month' => MonthCriteria::class,
+'created_at'  => Condition::date('created_at'),
+'birth_year'  => Condition::year('birth_date'),
+'birth_month' => Condition::month('birth_date'),
 ```
 
 #### Sets & Arrays
-Checks whether a column is among an array of inputs.
 ```php
-'tags' => InCriteria::class,    // Expects $request->tags = ['php', 'laravel']
-'ignore' => NotInCriteria::class, // Exclude IDs
+'tags'   => Condition::whereIn('tags'),
+'ignore' => Condition::whereNotIn('id'),
 ```
 
 #### Nullity Checks
-Pass a truthy value (`true`, `1`) to trigger these.
 ```php
-'unverified' => NullCriteria::class,    // ->whereNull('email_verified_at')
-'active_only' => NotNullCriteria::class // ->whereNotNull('email_verified_at')
+'unverified' => Condition::whereNull('email_verified_at'),
+'active'     => Condition::whereNotNull('email_verified_at'),
 ```
 
 #### JSON Columns
-Filter based on JSON arrays directly in the database.
 ```php
-'has_tag' => JsonContainsCriteria::class, // ->whereJsonContains('tags', input)
+'has_tag' => Condition::jsonContains('tags'),
 ```
 
-#### Dynamic Sorting (OrderByCriteria)
-Pass `Filter::ASC` or `Filter::DESC` to dynamically sort records dynamically instead of hardcoding `->orderBy()`.
+#### Dynamic Sorting
 ```php
-'sort_date' => [
-    'class' => OrderByCriteria::class,
-    'columns' => 'created_at' // expects $request->sort_date = Filter::DESC
-]
+'sort_by' => Condition::orderBy('created_at')->desc(),
+```
+
+#### Nested Groups
+Combine different criteria types in a single parenthesized group:
+```php
+'search' => Condition::orGroup(
+    Condition::like('name'),
+    Condition::where('email'),
+),
+// WHERE ((name LIKE '%val%') OR (email = 'val'))
+
+'date_range' => Condition::andGroup(
+    Condition::date('created_at')->gte(),
+    Condition::date('created_at')->lte(),
+),
+// WHERE ((DATE(created_at) >= 'val') AND (DATE(created_at) <= 'val'))
 ```
 
 ### Custom Criteria
+
+Create your own criteria by extending `BaseCriteria`, then reference it with `Condition::custom()`:
 
 ```php
 namespace App\Criteria;
@@ -274,6 +298,18 @@ class ActiveWithRecentPostsCriteria extends BaseCriteria
         $query->where('active', true)
             ->whereHas('posts', fn (Builder $q) => $q->where('created_at', '>=', now()->subDays(30)));
     }
+}
+```
+
+```php
+// In your repository:
+use App\Criteria\ActiveWithRecentPostsCriteria;
+
+protected function conditions(): array
+{
+    return [
+        'recent_active' => Condition::custom(ActiveWithRecentPostsCriteria::class),
+    ];
 }
 ```
 

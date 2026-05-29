@@ -2,6 +2,7 @@
 
 namespace ByteTCore\Serpo\Criteria;
 
+use ByteTCore\Serpo\Constants\Filter;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -20,7 +21,7 @@ class WhereCriteria extends BaseCriteria
         }
 
         $columns = $this->parseColumns();
-        $operator = $this->getOperator('=');
+        $operator = $this->getOperator(Filter::EQUAL);
 
         $query->where(
             fn (Builder $q) => array_walk(

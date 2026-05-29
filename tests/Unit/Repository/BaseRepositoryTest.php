@@ -2,6 +2,7 @@
 
 namespace ByteTCore\Serpo\Tests\Unit\Repository;
 
+use ByteTCore\Serpo\Criteria\Condition;
 use ByteTCore\Serpo\Criteria\LikeCriteria;
 use ByteTCore\Serpo\Criteria\WhereCriteria;
 use ByteTCore\Serpo\Repositories\BaseRepository;
@@ -215,5 +216,59 @@ class BaseRepositoryTest extends TestCase
         $result = $repo->count();
 
         $this->assertSame(42, $result);
+    }
+
+    public function test_filters_with_condition_objects(): void
+    {
+        $repo = $this->makeRepositoryWithConditions([
+            'status' => Condition::where(),
+            'keyword' => Condition::like('name', 'email')->or(),
+            'min_age' => Condition::where('age')->gte(),
+        ]);
+
+        // Only 'status' and 'min_age' are provided in the request
+        $this->builder->shouldReceive('where')
+            ->twice()
+            ->withArgs(fn ($arg) => is_callable($arg))
+            ->andReturnUsing(function ($callback) {
+                $callback($this->builder);
+
+                return $this->builder;
+            });
+
+        $this->builder->shouldReceive('where')
+            ->once()
+            ->with('status', '=', 'active', 'and')
+            ->andReturnSelf();
+
+        $this->builder->shouldReceive('where')
+            ->once()
+            ->with('age', '>=', 18, 'and')
+            ->andReturnSelf();
+
+        $repo->filters(['status' => 'active', 'min_age' => 18]);
+    }
+
+    public function test_filters_without_columns_uses_key_as_default(): void
+    {
+        $repo = $this->makeRepositoryWithConditions([
+            'category' => Condition::where(),
+        ]);
+
+        $this->builder->shouldReceive('where')
+            ->once()
+            ->withArgs(fn ($arg) => is_callable($arg))
+            ->andReturnUsing(function ($callback) {
+                $callback($this->builder);
+
+                return $this->builder;
+            });
+
+        $this->builder->shouldReceive('where')
+            ->once()
+            ->with('category', '=', 'news', 'and')
+            ->andReturnSelf();
+
+        $repo->filters(['category' => 'news']);
     }
 }

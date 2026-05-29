@@ -2,6 +2,7 @@
 
 namespace ByteTCore\Serpo\Criteria;
 
+use ByteTCore\Serpo\Constants\Filter;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -22,8 +23,8 @@ class OrderByCriteria extends BaseCriteria
 
         // Ensure direction is valid
         $direction = strtolower((string) $this->value);
-        if (! in_array($direction, ['asc', 'desc'], true)) {
-            $direction = 'asc';
+        if (! in_array($direction, [Filter::ASC, Filter::DESC], true)) {
+            $direction = Filter::ASC;
         }
 
         array_walk(
