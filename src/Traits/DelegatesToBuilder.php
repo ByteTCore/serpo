@@ -18,6 +18,14 @@ trait DelegatesToBuilder
      */
     public function __call(string $method, array $parameters): mixed
     {
+        $cached = method_exists($this, 'getCachedResult')
+            ? $this->getCachedResult($method, $parameters)
+            : false;
+
+        if ($cached !== false) {
+            return $cached;
+        }
+
         try {
             $result = $this->forwardCallTo($this->query, $method, $parameters);
         } catch (BadMethodCallException) {
@@ -32,6 +40,10 @@ trait DelegatesToBuilder
 
         if ($this->autoReset) {
             $this->resetQuery();
+        }
+
+        if (method_exists($this, 'putCacheResult')) {
+            $result = $this->putCacheResult($result, $method, $parameters);
         }
 
         return $result;

@@ -3,6 +3,7 @@
 namespace ByteTCore\Serpo\Repositories;
 
 use ByteTCore\Serpo\Contracts\RepositoryInterface;
+use ByteTCore\Serpo\Traits\Cacheable;
 use ByteTCore\Serpo\Traits\DelegatesToBuilder;
 use ByteTCore\Serpo\Traits\HasCriteria;
 use ByteTCore\Serpo\Traits\ResetsQuery;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 abstract class BaseRepository implements RepositoryInterface
 {
+    use Cacheable;
     use DelegatesToBuilder;
     use HasCriteria;
     use ResetsQuery;

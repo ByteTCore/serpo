@@ -49,13 +49,16 @@ return [
     | Cache Configuration
     |--------------------------------------------------------------------------
     |
-    | Enable or disable caching. When enabled, set the cache driver to one
-    | of: "redis", "file", or "database".
+    | Enable or disable caching. Only "redis" driver is supported.
+    |
+    | ttl — Default cache lifetime in seconds (900 = 15minutes).
     |
     */
     'cache' => [
         'enabled' => env('SERPO_CACHE_ENABLED', false),
         'driver'  => env('SERPO_CACHE_DRIVER', 'redis'),
+        'ttl'     => env('SERPO_CACHE_TTL', 900),
+        'prefix'  => env('SERPO_CACHE_PREFIX', 'serpo'),
     ],
 
 ];

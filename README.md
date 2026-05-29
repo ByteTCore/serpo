@@ -13,7 +13,8 @@ Elegant data layer abstraction for Laravel using the **Repository Pattern** with
 
 - 🏗️ **Repository Pattern** — Abstract Eloquent models behind clean interfaces
 - 🔍 **Criteria System** — Composable, reusable query filters (where, like, date, JSON, null, in)
-- ⚡ **Zero Boilerplate** — Artisan generators for repositories, services, and criteria
+- ⚡ **Query Caching** — Redis-backed query cache with auto-key generation and configurable TTL
+- 🔧 **Zero Boilerplate** — Artisan generators for repositories, services, and criteria
 - 🔗 **Fluent Chaining** — Chain any Eloquent Builder method directly on repositories
 - 🔄 **Auto Query Reset** — Query state resets after execution, preventing stale queries
 - 📦 **Laravel Auto-Discovery** — Install and go, no manual provider registration
@@ -332,6 +333,41 @@ $count = $repo->count();       // same filtered query
 $users = $repo->get();         // same filtered query
 ```
 
+### Caching
+
+Cache query results to reduce database load. Enable it in `config/serpo.php` by setting `cache.enabled` to `true`.
+
+Call `cache()` before any terminal method (`get`, `paginate`, `first`, `count`, etc.) to cache the result:
+
+```php
+$repo = app(UserRepository::class);
+
+// Cache a get() result with auto-generated key (SHA-256 of table + filters)
+$users = $repo->filters(['status' => 'active'])->cache()->get();
+
+// Custom key + custom TTL
+$users = $repo->filters(['status' => 'active'])->cache(key: 'active_users', ttl: 300)->get();
+
+// Works with any terminal method
+$paginated = $repo->filters($filters)->cache(key: 'search_results')->paginate(10);
+$first = $repo->cache(key: 'latest')->latest()->first();
+$count = $repo->filters(['role' => 'admin'])->cache(key: 'admin_count')->count();
+
+// Delete all entries for a specific custom key
+$repo->forget('active_users');
+
+// Flush all cached queries for this repository's model
+$repo->flush();
+```
+
+**How it works:**
+
+- `cache()` marks the query — does not execute yet
+- The next terminal method (`get`, `paginate`, `first`, `count`, ...) checks cache before executing and stores the result after
+- Cache key format: `{custom_or_hash}:{method}:{params_hash}` — different method+params produce different cache entries under the same custom key
+- `forget('key')` scans and deletes all entries starting with that key prefix
+- `flush()` clears all cached entries for this model's table
+
 ## Configuration
 
 ```php
@@ -346,8 +382,24 @@ return [
     'criteria' => [
         'namespace' => env('SERPO_CRITERIA_NAMESPACE', 'Criteria'),
     ],
+    'cache' => [
+        'enabled' => env('SERPO_CACHE_ENABLED', false),
+        'driver'  => env('SERPO_CACHE_DRIVER', 'redis'),
+        'ttl'     => env('SERPO_CACHE_TTL', 3600),
+        'prefix'  => env('SERPO_CACHE_PREFIX', 'serpo'),
+    ],
 ];
 ```
+
+| Config Key | Env Variable | Default | Description |
+|---|---|---|---|
+| `repository.namespace` | `SERPO_REPOSITORY_NAMESPACE` | `Repositories` | Default namespace for generated repositories |
+| `service.namespace` | `SERPO_SERVICE_NAMESPACE` | `Services` | Default namespace for generated services |
+| `criteria.namespace` | `SERPO_CRITERIA_NAMESPACE` | `Criteria` | Default namespace for generated criteria |
+| `cache.enabled` | `SERPO_CACHE_ENABLED` | `false` | Toggle repository caching on/off |
+| `cache.driver` | `SERPO_CACHE_DRIVER` | `redis` | Cache store driver (only Redis supported) |
+| `cache.ttl` | `SERPO_CACHE_TTL` | `3600` | Default cache lifetime in seconds |
+| `cache.prefix` | `SERPO_CACHE_PREFIX` | `serpo` | Cache key prefix to avoid collisions |
 
 ## Testing
 

@@ -9,6 +9,8 @@ trait HasCriteria
 {
     protected array $conditions = [];
 
+    protected ?array $appliedFilters = null;
+
     /**
      * Return the conditions map.
      *
@@ -19,12 +21,6 @@ trait HasCriteria
         return $this->conditions;
     }
 
-    /**
-     * Apply a group of criteria filters to the repository query.
-     *
-     * Only keys present in {@see conditions()} are processed.
-     * Shorthand strings are normalized to ['class' => ...] automatically.
-     */
     /**
      * Return the order in which filter keys should be applied.
      *
@@ -48,6 +44,8 @@ trait HasCriteria
             return $this;
         }
 
+        $this->appliedFilters = $filters;
+
         $conditions = $this->conditions();
         $keys = $this->resolveFilterKeys(array_keys($conditions));
 
@@ -56,27 +54,42 @@ trait HasCriteria
                 continue;
             }
 
-            $config = $conditions[$key];
-            $value = $filters[$key];
-
-            if ($config instanceof Condition || $config instanceof ConditionGroup) {
-                $config->resolve($value, $key)->apply($this->query);
-
-                continue;
-            }
-
-            if (is_string($config)) {
-                $config = ['class' => $config];
-            }
-
-            $config['columns'] ??= $key;
-            $class = $config['class'];
-            $criteria = new $class($value, $config);
-
-            $criteria->apply($this->query);
+            $this->applyFilter($conditions[$key], $filters[$key], $key);
         }
 
         return $this;
+    }
+
+    /**
+     * Dispatch a single filter to the appropriate handler.
+     *
+     * Routes Condition/ConditionGroup instances to their resolve+apply flow,
+     * and legacy array/string configs to applyCriteriaConfig().
+     */
+    private function applyFilter(mixed $config, mixed $value, string $key): void
+    {
+        if ($config instanceof Condition || $config instanceof ConditionGroup) {
+            $config->resolve($value, $key)->apply($this->query);
+
+            return;
+        }
+
+        $this->applyCriteriaConfig(
+            is_string($config) ? ['class' => $config] : $config,
+            $value,
+            $key
+        );
+    }
+
+    /**
+     * Instantiate a criteria class from an array config and apply it to the query.
+     */
+    private function applyCriteriaConfig(array $config, mixed $value, string $key): void
+    {
+        $config['columns'] ??= $key;
+
+        $criteria = new $config['class']($value, $config);
+        $criteria->apply($this->query);
     }
 
     /**
